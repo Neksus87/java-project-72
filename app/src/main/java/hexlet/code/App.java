@@ -3,9 +3,12 @@ package hexlet.code;
 import java.io.BufferedReader;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import hexlet.code.controller.MainController;
+import hexlet.code.controller.UrlsController;
 import io.javalin.Javalin;
 import lombok.extern.slf4j.Slf4j;
 
+import hexlet.code.repository.BaseRepository;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -43,9 +46,13 @@ public class App {
 
         var app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();
+            config.fileRenderer(new JavalinJte(createTemplateEngine()));
         });
 
-        app.get("/", ctx -> ctx.result("Hello World"));
+        app.get("/", MainController::index);
+        app.get("/urls", UrlsController::index);
+        app.get("/urls/{id}", UrlsController::show);
+        app.post("/urls", UrlsController::create);
         return app;
     }
 
@@ -56,5 +63,12 @@ public class App {
         try (var bufferedReader = new BufferedReader(inputStreamReader)) {
             return bufferedReader.lines().collect(Collectors.joining("\n"));
         }
+    }
+
+    private static TemplateEngine createTemplateEngine() {
+        ClassLoader classLoader = App.class.getClassLoader();
+        ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
+        TemplateEngine templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
+        return templateEngine;
     }
 }
