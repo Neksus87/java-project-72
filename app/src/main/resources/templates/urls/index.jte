@@ -1,6 +1,6 @@
 @import hexlet.code.util.NamedRoutes
-@import hexlet.code.dto.urls.UrlsPage
 @import java.text.SimpleDateFormat
+@import hexlet.code.dto.urls.UrlsPage
 @param UrlsPage page
 
 @template.layout.page(
@@ -26,6 +26,7 @@
                             <td>
                                 <a href="${NamedRoutes.urlPath(url.getId())}">${url.getName()}</a>
                             </td>
+
                             @if (latestCheck != null)
                                 <td>${new SimpleDateFormat("dd/MM/yyyy HH:mm").format(latestCheck.getCreatedAt())}</td>
                                 <td>${latestCheck.getStatusCode()}</td>
