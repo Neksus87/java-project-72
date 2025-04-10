@@ -1,49 +1,43 @@
-name: Java CI
+@import hexlet.code.util.NamedRoutes
+@import java.text.SimpleDateFormat
+@import hexlet.code.dto.urls.UrlsPage
+@param UrlsPage page
 
-on:
-  - push
-  - pull_request
+@template.layout.page(
+    page = page,
+    content = @`
+        <div class="container-lg mt-5">
+            <h1>Сайты</h1>
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+            <table class="table table-bordered table-hover mt-3">
+                <thead>
+                    <tr>
+                        <th class="col-1">ID</th>
+                        <th>Имя</th>
+                        <th closs="col-2">Последняя проверка</th>
+                        <th class="col-1">Код ответа</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(var url : page.getUrls())
+                        !{var latestCheck = page.getLatestChecksByUrlId().get(url.getId());}
+                        <tr>
+                            <td>${url.getId()}</td>
+                            <td>
+                                <a href="${NamedRoutes.urlPath(url.getId())}">${url.getName()}</a>
+                            </td>
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Build with Gradle
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-version: 8.8
-
-      - run: make setup
-      - run: make lint
-      - run: make test
-
-      - name: Generate JaCoCo Test Report
-        run: ./gradlew jacocoTestReport
-
-      - name: Publish code coverage
-        uses: paambaati/codeclimate-action@v5.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-          JACOCO_SOURCE_PATH: app/src/main/java
-        with:
-          coverageCommand: make report
-          coverageLocations: ${{ github.workspace }}/app/build/reports/jacoco/test/jacocoTestReport.xml:jacoco
+                            @if (latestCheck != null)
+                                <td>${new SimpleDateFormat("dd/MM/yyyy HH:mm").format(latestCheck.getCreatedAt())}</td>
+                                <td>${latestCheck.getStatusCode()}</td>
+                            @else
+                                <td></td>
+                                <td></td>
+                            @endif
+                        </tr>
+                    @endfor
+                </tbody>
+            </table>
+        </div>
+    `
+)
