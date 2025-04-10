@@ -8,8 +8,8 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
-import hexlet.code.urls.UrlPage;
-import hexlet.code.urls.UrlsPage;
+import hexlet.code.dto.urls.UrlPage;
+import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
