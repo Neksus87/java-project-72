@@ -2,11 +2,13 @@ package hexlet.code.repository;
 
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import hexlet.code.model.Url;
+
+import java.sql.Timestamp;
 
 public class UrlRepository extends BaseRepository {
     public static void save(Url url) throws SQLException {
@@ -16,8 +18,12 @@ public class UrlRepository extends BaseRepository {
                 var conn = dataSource.getConnection();
                 var preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
         ) {
+            // Устанавливаем текущую дату и время
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            url.setCreatedAt(now);
+
             preparedStatement.setString(1, url.getName());
-            preparedStatement.setTimestamp(2, url.getCreatedAt());
+            preparedStatement.setTimestamp(2, now);
             preparedStatement.executeUpdate();
 
             var generatedKeys = preparedStatement.getGeneratedKeys();
@@ -30,23 +36,24 @@ public class UrlRepository extends BaseRepository {
         }
     }
 
-    public static List<Url> getEntities() throws SQLException {
-        var sql = "SELECT * FROM urls";
+    public static Map<Long, Url> getEntities() throws SQLException {
+        var sql = "SELECT * FROM urls ORDER BY id ASC"; // Явная сортировка по ID
 
         try (
                 var conn = dataSource.getConnection();
                 var stmt = conn.prepareStatement(sql)
         ) {
             var resultSet = stmt.executeQuery();
-            var result = new ArrayList<Url>();
+            var result = new HashMap<Long, Url>();
 
             while (resultSet.next()) {
                 var id = resultSet.getLong("id");
                 var name = resultSet.getString("name");
                 var createdAt = resultSet.getTimestamp("created_at");
-                var url = new Url(name, createdAt);
+                var url = new Url(name);
                 url.setId(id);
-                result.add(url);
+                url.setCreatedAt(createdAt);
+                result.put(id, url); // Добавляем в мапу с ключом id
             }
 
             return result;
@@ -66,8 +73,9 @@ public class UrlRepository extends BaseRepository {
             if (resultSet.next()) {
                 var name = resultSet.getString("name");
                 var createdAt = resultSet.getTimestamp("created_at");
-                var url = new Url(name, createdAt);
+                var url = new Url(name);
                 url.setId(id);
+                url.setCreatedAt(createdAt);
                 return Optional.of(url);
             }
 
@@ -85,11 +93,7 @@ public class UrlRepository extends BaseRepository {
             stmt.setString(1, name);
             var resultSet = stmt.executeQuery();
 
-            if (resultSet.next()) {
-                return true;
-            }
-
-            return false;
+            return resultSet.next();
         }
     }
 }

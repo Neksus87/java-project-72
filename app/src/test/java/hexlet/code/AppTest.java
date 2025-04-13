@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 import hexlet.code.repository.UrlCheckRepository;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,15 +22,21 @@ import io.javalin.testtools.JavalinTest;
 
 public class AppTest {
     Javalin app;
-    MockWebServer mockWebServer;
+    static MockWebServer mockWebServer; // Статический сервер
     Url url;
 
-    @BeforeEach
-    public final void setUp() throws IOException, SQLException {
-        app = App.getApp();
+    @BeforeAll
+    public static void setUpServer() throws IOException {
+        // Создаем и запускаем MockWebServer один раз для всех тестов
         mockWebServer = new MockWebServer();
         mockWebServer.start();
-        url = new Url("https://www.example.com:8080", new Timestamp(System.currentTimeMillis()));
+    }
+
+    @BeforeEach
+    public void setUp() throws SQLException {
+        // Инициализируем приложение и URL перед каждым тестом
+        app = App.getApp();
+        url = new Url("https://www.example.com:8080"); // Дата больше не передается явно
     }
 
     @Test
@@ -126,8 +132,36 @@ public class AppTest {
         assertThat(UrlCheckRepository.getEntitiesByUrlId(url.getId())).hasSize(1);
     }
 
-    @AfterEach
-    public final void tearDown() throws IOException {
+    @Test
+    public void testCreatedAtIsSetAutomatically() throws SQLException {
+        Url url = new Url("https://www.example.com");
+        UrlRepository.save(url);
+
+        // Проверяем, что дата была установлена
+        assertThat(url.getCreatedAt()).isNotNull();
+    }
+
+    @Test
+    public void testFieldsInDatabase() throws SQLException {
+        // Создаем новый URL
+        String testName = "https://test-url.com";
+        Url url = new Url(testName);
+        UrlRepository.save(url);
+
+        // Извлекаем сохраненную сущность из базы
+        var savedUrlOptional = UrlRepository.find(url.getId());
+        assertThat(savedUrlOptional).isPresent();
+
+        var savedUrl = savedUrlOptional.get();
+
+        // Проверяем соответствие полей
+        assertThat(savedUrl.getName()).isEqualTo(testName); // Проверка имени
+        assertThat(savedUrl.getCreatedAt()).isNotNull();   // Проверка даты создания
+    }
+
+    @AfterAll
+    public static void tearDownServer() throws IOException {
+        // Останавливаем MockWebServer после завершения всех тестов
         mockWebServer.shutdown();
     }
 }

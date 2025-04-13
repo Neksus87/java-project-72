@@ -10,15 +10,14 @@ https://java-project-72-xqnx.onrender.com
 
 ### Инструкция
 
-Вводим название сайта
+### Шаг 1: Вводим название сайта
+На этом этапе пользователь вводит URL сайта для анализа.
+![Ввод URL](Pictures/Screenshot%20from%202025-04-13%2013-21-03.png)
 
-![Screenshot from 2025-04-13 13-21-03.png](../Pictures/Screenshots/Screenshot%20from%202025-04-13%2013-21-03.png)
+### Шаг 2: Выбираем сайт
+После ввода URL система предлагает выбрать сайт из списка.
+![Выбор сайта](Pictures/Screenshot%20from%202025-04-13%2013-21-49.png)
 
-Выбираем сайт
-
-![Screenshot from 2025-04-13 13-21-49.png](../Pictures/Screenshots/Screenshot%20from%202025-04-13%2013-21-49.png)
-
-Запускаем проверку
-
-![Screenshot from 2025-04-13 13-22-03.png](../Pictures/Screenshots/Screenshot%20from%202025-04-13%2013-22-03.png)
-
+### Шаг 3: Запускаем проверку
+Нажмите кнопку "Проверить", чтобы начать анализ.
+![Запуск проверки](Pictures/Screenshot%20from%202025-04-13%2013-22-03.png)
