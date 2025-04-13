@@ -7,3 +7,18 @@
 ### Анализатор страниц
 ### Бесплатно проверяйте сайты на SEO пригодность
 https://java-project-72-xqnx.onrender.com
+
+### Инструкция
+
+Вводим название сайта
+
+![Screenshot from 2025-04-13 13-21-03.png](../Pictures/Screenshots/Screenshot%20from%202025-04-13%2013-21-03.png)
+
+Выбираем сайт
+
+![Screenshot from 2025-04-13 13-21-49.png](../Pictures/Screenshots/Screenshot%20from%202025-04-13%2013-21-49.png)
+
+Запускаем проверку
+
+![Screenshot from 2025-04-13 13-22-03.png](../Pictures/Screenshots/Screenshot%20from%202025-04-13%2013-22-03.png)
+
