@@ -18,7 +18,6 @@ public class UrlRepository extends BaseRepository {
                 var conn = dataSource.getConnection();
                 var preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
         ) {
-            // Устанавливаем текущую дату и время
             Timestamp now = new Timestamp(System.currentTimeMillis());
             url.setCreatedAt(now);
 
@@ -37,7 +36,7 @@ public class UrlRepository extends BaseRepository {
     }
 
     public static Map<Long, Url> getEntities() throws SQLException {
-        var sql = "SELECT * FROM urls ORDER BY id ASC"; // Явная сортировка по ID
+        var sql = "SELECT * FROM urls ORDER BY id ASC";
 
         try (
                 var conn = dataSource.getConnection();
@@ -53,7 +52,7 @@ public class UrlRepository extends BaseRepository {
                 var url = new Url(name);
                 url.setId(id);
                 url.setCreatedAt(createdAt);
-                result.put(id, url); // Добавляем в мапу с ключом id
+                result.put(id, url);
             }
 
             return result;

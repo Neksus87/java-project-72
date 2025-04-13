@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import io.javalin.http.NotFoundResponse;
 
 public class UrlsController {
     public static void index(Context ctx) throws SQLException {
+        // Получаем все URL-адреса из репозитория (Map<Long, Url>)
         var urls = UrlRepository.getEntities();
         var latestUrlChecks = UrlCheckRepository.getLatestEntities();
         Map<Long, UrlCheck> latestUrlChecksByUrlId = new HashMap<>();
@@ -29,7 +31,10 @@ public class UrlsController {
             latestUrlChecksByUrlId.put(check.getUrlId(), check);
         }
 
-        var page = new UrlsPage(urls, latestUrlChecksByUrlId);
+        // Преобразуем мапу в список для передачи в конструктор страницы
+        var urlsList = new ArrayList<>(urls.values());
+
+        var page = new UrlsPage(urlsList, latestUrlChecksByUrlId);
         page.setFlash(ctx.consumeSessionAttribute("flash"));
         page.setFlashType(ctx.consumeSessionAttribute("flashType"));
         ctx.render("urls/index.jte", model("page", page));
@@ -58,7 +63,10 @@ public class UrlsController {
                 return;
             }
 
-            var url = new Url(name, createdAt);
+            // Создаем объект Url с одним параметром
+            var url = new Url(name);
+            url.setCreatedAt(createdAt);
+
             UrlRepository.save(url);
             ctx.sessionAttribute("flash", "Страница успешно добавлена");
             ctx.sessionAttribute("flashType", "success");
