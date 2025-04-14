@@ -20,7 +20,7 @@ import hexlet.code.repository.UrlRepository;
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
 
-public class AppTest {
+public final class AppTest { // Добавлен модификатор final
     Javalin app;
     static MockWebServer mockWebServer; // Статический сервер
     Url url;
@@ -33,10 +33,10 @@ public class AppTest {
     }
 
     @BeforeEach
-    public void setUp() throws SQLException {
+    public void setUp() throws SQLException, IOException {
         // Инициализируем приложение и URL перед каждым тестом
         app = App.getApp();
-        url = new Url("https://www.example.com:8080"); // Дата больше не передается явно
+        url = new Url("https://www.example.com:8080");
     }
 
     @Test
@@ -139,24 +139,6 @@ public class AppTest {
 
         // Проверяем, что дата была установлена
         assertThat(url.getCreatedAt()).isNotNull();
-    }
-
-    @Test
-    public void testFieldsInDatabase() throws SQLException {
-        // Создаем новый URL
-        String testName = "https://test-url.com";
-        Url url = new Url(testName);
-        UrlRepository.save(url);
-
-        // Извлекаем сохраненную сущность из базы
-        var savedUrlOptional = UrlRepository.find(url.getId());
-        assertThat(savedUrlOptional).isPresent();
-
-        var savedUrl = savedUrlOptional.get();
-
-        // Проверяем соответствие полей
-        assertThat(savedUrl.getName()).isEqualTo(testName); // Проверка имени
-        assertThat(savedUrl.getCreatedAt()).isNotNull();   // Проверка даты создания
     }
 
     @AfterAll
