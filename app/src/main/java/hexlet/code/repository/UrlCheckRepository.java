@@ -7,6 +7,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class UrlCheckRepository extends BaseRepository {
     public static void save(UrlCheck urlCheck) throws SQLException {
         var sql = "INSERT INTO url_checks (status_code, title, h1, description, url_id, created_at) "
@@ -35,7 +38,8 @@ public class UrlCheckRepository extends BaseRepository {
     }
 
     public static List<UrlCheck> getEntitiesByUrlId(Long urlId) throws SQLException {
-        var sql = "SELECT * FROM url_checks WHERE url_id = ?";
+        // Добавляем ORDER BY created_at DESC для сортировки по дате создания
+        var sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC";
 
         try (
                 var conn = dataSource.getConnection();
@@ -61,7 +65,7 @@ public class UrlCheckRepository extends BaseRepository {
         }
     }
 
-    public static List<UrlCheck> getLatestEntities() throws SQLException {
+    public static Map<Long, UrlCheck> getLatestEntities() throws SQLException {
         var sql = "SELECT DISTINCT ON (url_id) * FROM url_checks ORDER BY url_id, created_at DESC";
 
         try (
@@ -69,7 +73,7 @@ public class UrlCheckRepository extends BaseRepository {
                 var stmt = conn.prepareStatement(sql)
         ) {
             var resultSet = stmt.executeQuery();
-            var result = new ArrayList<UrlCheck>();
+            var result = new HashMap<Long, UrlCheck>(); // Используем HashMap для хранения результатов
 
             while (resultSet.next()) {
                 var id = resultSet.getLong("id");
@@ -79,12 +83,16 @@ public class UrlCheckRepository extends BaseRepository {
                 var description = resultSet.getString("description");
                 var urlId = resultSet.getLong("url_id");
                 var createdAt = resultSet.getTimestamp("created_at");
+
+                // Создаем объект UrlCheck
                 var urlCheck = new UrlCheck(statusCode, title, h1, description, urlId, createdAt);
                 urlCheck.setId(id);
-                result.add(urlCheck);
+
+                // Добавляем объект в мапу с ключом urlId
+                result.put(urlId, urlCheck);
             }
 
-            return result;
+            return result; // Возвращаем мапу
         }
     }
 }

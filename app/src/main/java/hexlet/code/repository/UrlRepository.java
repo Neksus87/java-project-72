@@ -18,17 +18,23 @@ public class UrlRepository extends BaseRepository {
                 var conn = dataSource.getConnection();
                 var preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
         ) {
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            url.setCreatedAt(now);
-
+            // Устанавливаем имя URL
             preparedStatement.setString(1, url.getName());
+
+            // Создаем временную метку для created_at
+            Timestamp now = new Timestamp(System.currentTimeMillis());
             preparedStatement.setTimestamp(2, now);
+
+            // Выполняем запрос
             preparedStatement.executeUpdate();
 
+            // Получаем сгенерированный ID
             var generatedKeys = preparedStatement.getGeneratedKeys();
 
             if (generatedKeys.next()) {
+                // Устанавливаем ID и дату только после успешного выполнения запроса
                 url.setId(generatedKeys.getLong(1));
+                url.setCreatedAt(now); // Устанавливаем дату после выполнения запроса
             } else {
                 throw new SQLException("DB have not returned an id after saving an entity");
             }

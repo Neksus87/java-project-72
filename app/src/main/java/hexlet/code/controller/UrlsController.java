@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
@@ -22,19 +23,25 @@ import io.javalin.http.NotFoundResponse;
 
 public class UrlsController {
     public static void index(Context ctx) throws SQLException {
-        // Получаем все URL-адреса из репозитория (Map<Long, Url>)
+        // Получаем все URL-адреса из базы данных
         var urls = UrlRepository.getEntities();
+
+        // Получаем последние проверки для каждого URL
         var latestUrlChecks = UrlCheckRepository.getLatestEntities();
         Map<Long, UrlCheck> latestUrlChecksByUrlId = new HashMap<>();
 
-        for (var check : latestUrlChecks) {
-            latestUrlChecksByUrlId.put(check.getUrlId(), check);
+        // Обходим значения Map и заполняем мапу latestUrlChecksByUrlId
+        for (var entry : latestUrlChecks.entrySet()) {
+            Long urlId = entry.getKey();
+            UrlCheck check = entry.getValue();
+            latestUrlChecksByUrlId.put(urlId, check);
         }
 
-        // Преобразуем мапу в список для передачи в конструктор страницы
-        var urlsList = new ArrayList<>(urls.values());
+        // Преобразуем Map<Long, Url> в List<Url>, если это требуется
+        List<Url> urlList = new ArrayList<>(urls.values());
 
-        var page = new UrlsPage(urlsList, latestUrlChecksByUrlId);
+        // Создаем страницу с данными
+        var page = new UrlsPage(urlList, latestUrlChecksByUrlId);
         page.setFlash(ctx.consumeSessionAttribute("flash"));
         page.setFlashType(ctx.consumeSessionAttribute("flashType"));
         ctx.render("urls/index.jte", model("page", page));
