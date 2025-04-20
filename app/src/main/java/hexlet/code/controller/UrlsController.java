@@ -1,13 +1,9 @@
 package hexlet.code.controller;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
+
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
 
 import hexlet.code.dto.urls.UrlPage;
@@ -21,29 +17,23 @@ import hexlet.code.util.UrlUtils;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 public class UrlsController {
     public static void index(Context ctx) throws SQLException {
-        // Получаем все URL-адреса из базы данных
+        // Получаем список всех URL-адресов
         var urls = UrlRepository.getEntities();
 
-        // Получаем последние проверки для каждого URL
+        // Получаем список последних проверок
         var latestUrlChecks = UrlCheckRepository.getLatestEntities();
-        Map<Long, UrlCheck> latestUrlChecksByUrlId = new HashMap<>();
-
-        // Обходим значения Map и заполняем мапу latestUrlChecksByUrlId
-        for (var entry : latestUrlChecks.entrySet()) {
-            Long urlId = entry.getKey();
-            UrlCheck check = entry.getValue();
-            latestUrlChecksByUrlId.put(urlId, check);
-        }
-
-        // Преобразуем Map<Long, Url> в List<Url>, если это требуется
-        List<Url> urlList = new ArrayList<>(urls.values());
 
         // Создаем страницу с данными
-        var page = new UrlsPage(urlList, latestUrlChecksByUrlId);
+        var page = new UrlsPage(urls, latestUrlChecks);
         page.setFlash(ctx.consumeSessionAttribute("flash"));
         page.setFlashType(ctx.consumeSessionAttribute("flashType"));
+
+        // Отображаем шаблон
         ctx.render("urls/index.jte", model("page", page));
     }
 
@@ -70,7 +60,6 @@ public class UrlsController {
                 return;
             }
 
-            // Создаем объект Url с одним параметром
             var url = new Url(name);
             url.setCreatedAt(createdAt);
 

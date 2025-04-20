@@ -1,14 +1,12 @@
 package hexlet.code.repository;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import hexlet.code.model.Url;
 
-import java.sql.Timestamp;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class UrlRepository extends BaseRepository {
     public static void save(Url url) throws SQLException {
@@ -18,30 +16,20 @@ public class UrlRepository extends BaseRepository {
                 var conn = dataSource.getConnection();
                 var preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
         ) {
-            // Устанавливаем имя URL
             preparedStatement.setString(1, url.getName());
-
-            // Создаем временную метку для created_at
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            preparedStatement.setTimestamp(2, now);
-
-            // Выполняем запрос
+            preparedStatement.setTimestamp(2, url.getCreatedAt());
             preparedStatement.executeUpdate();
 
-            // Получаем сгенерированный ID
             var generatedKeys = preparedStatement.getGeneratedKeys();
-
             if (generatedKeys.next()) {
-                // Устанавливаем ID и дату только после успешного выполнения запроса
                 url.setId(generatedKeys.getLong(1));
-                url.setCreatedAt(now); // Устанавливаем дату после выполнения запроса
             } else {
                 throw new SQLException("DB have not returned an id after saving an entity");
             }
         }
     }
 
-    public static Map<Long, Url> getEntities() throws SQLException {
+    public static List<Url> getEntities() throws SQLException {
         var sql = "SELECT * FROM urls ORDER BY id ASC";
 
         try (
@@ -49,7 +37,7 @@ public class UrlRepository extends BaseRepository {
                 var stmt = conn.prepareStatement(sql)
         ) {
             var resultSet = stmt.executeQuery();
-            var result = new HashMap<Long, Url>();
+            var result = new ArrayList<Url>();
 
             while (resultSet.next()) {
                 var id = resultSet.getLong("id");
@@ -58,7 +46,7 @@ public class UrlRepository extends BaseRepository {
                 var url = new Url(name);
                 url.setId(id);
                 url.setCreatedAt(createdAt);
-                result.put(id, url);
+                result.add(url);
             }
 
             return result;
@@ -89,7 +77,7 @@ public class UrlRepository extends BaseRepository {
     }
 
     public static boolean existsByName(String name) throws SQLException {
-        var sql = "SELECT * FROM urls WHERE name = ?";
+        var sql = "SELECT COUNT(*) FROM urls WHERE name = ?";
 
         try (
                 var conn = dataSource.getConnection();
@@ -97,8 +85,8 @@ public class UrlRepository extends BaseRepository {
         ) {
             stmt.setString(1, name);
             var resultSet = stmt.executeQuery();
-
-            return resultSet.next();
+            resultSet.next();
+            return resultSet.getInt(1) > 0;
         }
     }
 }
