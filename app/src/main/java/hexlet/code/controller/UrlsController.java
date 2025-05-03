@@ -1,15 +1,15 @@
 package hexlet.code.controller;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
-
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.ArrayList;
 
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.model.Url;
-import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.util.NamedRoutes;
@@ -17,23 +17,20 @@ import hexlet.code.util.UrlUtils;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-
 public class UrlsController {
     public static void index(Context ctx) throws SQLException {
-        // Получаем список всех URL-адресов
+        // Получаем все URL-адреса из базы данных
         var urls = UrlRepository.getEntities();
 
-        // Получаем список последних проверок
+        // Получаем мапу с последними проверками для каждого URL
         var latestUrlChecks = UrlCheckRepository.getLatestEntities();
 
         // Создаем страницу с данными
-        var page = new UrlsPage(urls, latestUrlChecks);
+        var page = new UrlsPage(new ArrayList<>(urls.values()), latestUrlChecks);
         page.setFlash(ctx.consumeSessionAttribute("flash"));
         page.setFlashType(ctx.consumeSessionAttribute("flashType"));
 
-        // Отображаем шаблон
+        // Передаем данные в шаблон
         ctx.render("urls/index.jte", model("page", page));
     }
 
@@ -60,6 +57,7 @@ public class UrlsController {
                 return;
             }
 
+            // Создаем объект Url с одним параметром
             var url = new Url(name);
             url.setCreatedAt(createdAt);
 
